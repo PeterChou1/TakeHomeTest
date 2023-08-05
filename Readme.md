@@ -5,14 +5,6 @@
 
 To setup the program run the following commands
 
-```
-docker-compose up -d
-npm install
-npx prisma init
-npx prisma migrate dev --name init
-npx prisma db seed
-```
-
 Create a .env file with a JWT_SECRET_KEY and DATABASE_URL
 
 ```
@@ -25,6 +17,18 @@ Ex:
 DATABASE_URL="postgresql://db_user:db_password@localhost:5432/db_user"
 JWT_SECRET_KEY="my_super_secret_key"
 ```
+
+Next run the following command
+
+```
+docker-compose up -d
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+npx prisma db seed
+```
+
+
 
 Start the server
 
