@@ -11,6 +11,7 @@ import { JWT_SECRET_KEY } from './env';
 const getUserFromToken = (token : string) => {
   try {
     if (token) {
+      token = token.split(" ")[1];
       return jwt.verify(token, JWT_SECRET_KEY);
     }
     return null;

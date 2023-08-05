@@ -14,7 +14,7 @@ export const typeDefs = gql`
         limit: Int!
         sort: Boolean!
         filter_id: [Int]
-        filter_username: String
+        filter_moviename: String
         filter_description: String
     }
 

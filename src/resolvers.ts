@@ -12,7 +12,7 @@ interface GetMoviesInput {
     limit: number,
     sort: boolean,
     filter_id: [string],
-    filter_username: string,
+    filter_moviename: string,
     filter_description: string 
 }
 
@@ -44,7 +44,7 @@ interface Login {
 export const resolvers = {
     Query: {
         getMovies: async (parent: any, args : { movie: GetMoviesInput }) => {
-            const { offset, limit, sort, filter_id, filter_username, filter_description } = args.movie;
+            const { offset, limit, sort, filter_id, filter_moviename, filter_description } = args.movie;
 
             const filterOptions: any = {};
 
@@ -54,9 +54,9 @@ export const resolvers = {
                 };
             }
 
-            if (filter_username) {
-                filterOptions.username = {
-                    contains: filter_username,
+            if (filter_moviename) {
+                filterOptions.movie_name = {
+                    contains: filter_moviename,
                 };
             }
 
@@ -142,12 +142,25 @@ export const resolvers = {
         createMovie: async (parent: any, args: { movie: CreateMovieInput }) => {
             const { description, director, movie_name, release_date } = args.movie;
 
+            let date = Date.parse(release_date);
+            if (Number.isNaN(date)) {
+                throw new Error("Invalid Date format");
+            }
+
+            const existingMovie = await prisma.movies.findUnique({
+                where: { movie_name }
+            });
+
+            if (existingMovie) {
+                throw new Error('Movie Already Exists');
+            }
+
             const movie = await prisma.movies.create({
                 data: {
                     description,
                     director,
                     movie_name,
-                    release_date,
+                    release_date : new Date(date),
                 },
             });
 
@@ -156,12 +169,25 @@ export const resolvers = {
         updateMovie: async (parent: any, args: { movie: UpdateMovie }) => {
             const { id, description, director, release_date } = args.movie;
 
+            let date = Date.parse(release_date);
+            if (Number.isNaN(date)) {
+                throw new Error("Invalid Date format");
+            }
+
+            const existingMovie = await prisma.movies.findUnique({
+                where: { id }
+            });
+
+            if (!existingMovie) {
+                throw new Error('Movie Does Not Exist');
+            }
+
             const updatedMovie = await prisma.movies.update({
                 where: { id },
                 data: {
                     description,
                     director,
-                    release_date,
+                    release_date : new Date(date),
                 },
             });
 
@@ -169,6 +195,14 @@ export const resolvers = {
         },
         deleteMovie: async (parent: any, args: { id: number }) => {
             const { id } = args;
+
+            const existingMovie = await prisma.movies.findUnique({
+                where: { id }
+            });
+            
+            if (!existingMovie) {
+                throw new Error('Movie Does Not Exist');
+            }
 
             const deletedMovie = await prisma.movies.delete({
                 where: { id },
